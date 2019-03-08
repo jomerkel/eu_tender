@@ -55,7 +55,7 @@ class TedSpider(scrapy.Spider):
             detail_url = 'https://ted.europa.eu' + row.css('a::attr(href)').extract_first()
             item['url'] = detail_url
             item['document_id'] = row.css('a::text').extract_first()
-            # if '63731-2019' != item['document_id']:
+            # if '545824-2018' != item['document_id']:
             #     continue
             item['description'] = tds[2].css('::text').extract_first()
             item['country'] = tds[3].css('::text').extract_first()
@@ -99,6 +99,8 @@ class TedSpider(scrapy.Spider):
 
         if sections_5:
             for section_5 in sections_5:
+                new_item = TedEuropaEuItem()
+                new_item.update(**item)
                 if section_5:
 
                     name = section_5.xpath(".//span[text()='{}']/following-sibling::div/text()".format(text_2_3)).extract_first()
@@ -110,16 +112,16 @@ class TedSpider(scrapy.Spider):
                     if value:
                         value = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', value)
 
-                item['name'] = name
-                item['value'] = value
-                item['currency'] = currency
-                item['total'] = total
-                item['short_description'] = short_description.replace('\n', '') if short_description else ''
-                item['contracting_country'] = item['country']
-                yield item
-                # request = scrapy.Request(response.url + '&tabId=3', callback=self.parse_data, dont_filter=True)
-                # request.meta['item'] = item
-                # yield request
+                new_item['name'] = name
+                new_item['value'] = value
+                new_item['currency'] = currency
+                new_item['total'] = total
+                new_item['short_description'] = short_description.replace('\n', '') if short_description else ''
+                new_item['contracting_country'] = item['country']
+                # yield item
+                request = scrapy.Request(response.url + '&tabId=3', callback=self.parse_data, dont_filter=True)
+                request.meta['item'] = new_item
+                yield request
         else:
             yield item
 
@@ -136,4 +138,5 @@ class TedSpider(scrapy.Spider):
         item['product_type'] = product_type
         item['contracting_authority_city'] = table.xpath(".//td[text()='Place']/following-sibling::td/text()").extract_first()
 
-        return item
+        item['cpv_code'] = table.xpath(".//td[text()='CPV code']/following-sibling::td/text()").extract()
+        yield item
