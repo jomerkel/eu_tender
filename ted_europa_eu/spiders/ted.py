@@ -19,20 +19,14 @@ class TedSpider(scrapy.Spider):
     def start_requests2(self, response):
 
         data = [
-            ('chk', '72000000'),
-            ('chk', '35000000'),
-            ('chk', '32000000'),
-            ('chk', '63000000'),
-            ('chk', '73000000'),
-            ('chk', '48000000'),
             ('action', 'search'),
             ('lgId', 'en'),
             ('Rs.gp.8686990.pid', 'secured'),
             ('Rs.gp.8686991.pid', 'secured'),
             ('searchCriteria.searchScope', 'ARCHIVE'),
-            ('searchCriteria.freeText', '\u2018Nokia\u2019'),
+            ('searchCriteria.freeText', 'Nokia'),
             ('Rs.pick.857511.refDataId', 'COUNTRY'),
-            ('searchCriteria.documentTypeList', '\'Results of design contests\',\'Contract notice\',\'Contract award notice\',\'Voluntary ex ante transparency notice\',\'Concession award notice\''),
+            ('searchCriteria.documentTypeList', "'Results of design contests','Contract notice','Contract award notice','Voluntary ex ante transparency notice','Concession award notice'"),
             ('Rs.pick.857512.refDataId', 'DOCUMENT_TYPE'),
             ('Rs.pick.857513.refDataId', 'CONTRACT'),
             ('searchCriteria.publicationDateChoice', 'DEFINITE_PUBLICATION_DATE'),
@@ -61,6 +55,8 @@ class TedSpider(scrapy.Spider):
             detail_url = 'https://ted.europa.eu' + row.css('a::attr(href)').extract_first()
             item['url'] = detail_url
             item['document_id'] = row.css('a::text').extract_first()
+            # if '490757-2018' != item['document_id']:
+            #     continue
             item['description'] = tds[2].css('::text').extract_first()
             item['country'] = tds[3].css('::text').extract_first()
             item['publication_date'] = tds[4].css('::text').extract_first()
@@ -79,26 +75,34 @@ class TedSpider(scrapy.Spider):
         text_2_3 = 'Name and address of the contractor'
         text_2_4 = 'Information on value of the contract/lot (excluding VAT)'
 
-        sections_5 = response.css('div.grseq')
-        section_5 = None
+        sections = response.css('div.grseq')
 
-        for section in sections_5:
+        sections_5 = []
+
+        for section in sections:
             text = section.css('p::text').extract_first()
             if text and 'Section V: Award of' in text:
-                section_5 = section
-                break
+                sections_5.append(section)
 
-        if section_5:
-            name = section_5.xpath("//span[text()='{}']/following-sibling::div/text()".format(text_2_3)).extract_first()
-            value = section_5.xpath("//span[contains(text(),'{}')]/following-sibling::div/text()".format(text_2_4)).extract_first()
-            if value:
-                value = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', value)
+        names = []
+        values = []
+        for section_5 in sections_5:
+            if section_5:
 
-            item['name'] = name
-            item['value'] = value
-            return item
-        else:
-            item['name'] = None
-            item['value'] = None
-            return item
+                name = section_5.xpath(".//span[text()='{}']/following-sibling::div/text()".format(text_2_3)).extract_first()
+                value = section_5.xpath(".//span[contains(text(),'{}')]/following-sibling::div/text()".format(text_2_4)).extract_first()
+                print(section_5.css('div.txtmark::text').extract_first())
+                print('name {} value {}'.format(name, value))
+                if value:
+                    value = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', value)
+
+                if name:
+                    names.append(name)
+
+                if value:
+                    values.append(value)
+
+        item['name'] = ';'.join(names)
+        item['value'] = ';'.join(values)
+        return item
 
