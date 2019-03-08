@@ -18,3 +18,12 @@ class TedEuropaEuItem(scrapy.Item):
     url = scrapy.Field()
     name = scrapy.Field()
     value = scrapy.Field()
+    currency = scrapy.Field()
+    total = scrapy.Field()
+    short_description = scrapy.Field()
+    contracting_country = scrapy.Field()
+    award_date = scrapy.Field()
+    contracting_authority = scrapy.Field()
+    product_type =scrapy.Field()
+    contracting_authority_city = scrapy.Field()
+

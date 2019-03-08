@@ -12,14 +12,19 @@ class TedEuropaEuPipeline(object):
         return pipeline
 
     def spider_opened(self, spider):
-        self.file = open('search_reuslt_{}.csv'.format(spider.name), 'wb')
-        self.file_details = open('details_reuslt_{}.csv'.format(spider.name), 'wb')
+        self.file = open('search_result_{}.csv'.format(spider.name), 'wb')
+        self.file_details = open('details_result_{}.csv'.format(spider.name), 'wb')
 
         self.exporter = CsvItemExporter(self.file)
         self.details_exporter = CsvItemExporter(self.file_details)
 
-        self.exporter.fields_to_export = ['document_id', 'description', 'country', 'publication_date', 'deadline']
-        self.details_exporter.fields_to_export = ['url', 'document_id', 'name', 'value']
+        self.exporter.fields_to_export = [
+            'document_id', 'description', 'short_description',
+            'country', 'publication_date', 'deadline']
+        self.details_exporter.fields_to_export = [
+            'url', 'document_id', 'name', 'value', 'total', 'currency',
+            'contracting_country', 'award_date', 'product_type', 'contracting_authority',
+            'contracting_authority_city']
 
         self.exporter.start_exporting()
         self.details_exporter.start_exporting()

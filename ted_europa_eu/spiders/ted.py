@@ -55,7 +55,7 @@ class TedSpider(scrapy.Spider):
             detail_url = 'https://ted.europa.eu' + row.css('a::attr(href)').extract_first()
             item['url'] = detail_url
             item['document_id'] = row.css('a::text').extract_first()
-            # if '490757-2018' != item['document_id']:
+            # if '63731-2019' != item['document_id']:
             #     continue
             item['description'] = tds[2].css('::text').extract_first()
             item['country'] = tds[3].css('::text').extract_first()
@@ -74,6 +74,9 @@ class TedSpider(scrapy.Spider):
         item = response.meta['item']
         text_2_3 = 'Name and address of the contractor'
         text_2_4 = 'Information on value of the contract/lot (excluding VAT)'
+        text_1_7 = 'Total value of the procuremen'
+        text_1_4 = 'Short description'
+        desc_xpath = "//span[contains(text(), '{}')]//following-sibling::div".format(text_1_4)
 
         sections = response.css('div.grseq')
 
@@ -84,25 +87,53 @@ class TedSpider(scrapy.Spider):
             if text and 'Section V: Award of' in text:
                 sections_5.append(section)
 
-        names = []
-        values = []
-        for section_5 in sections_5:
-            if section_5:
+        currency = ''
+        total = response.xpath("//span[contains(text(), '{}')]//following-sibling::div/text()".format(text_1_7)).extract_first()
 
-                name = section_5.xpath(".//span[text()='{}']/following-sibling::div/text()".format(text_2_3)).extract_first()
-                value = section_5.xpath(".//span[contains(text(),'{}')]/following-sibling::div/text()".format(text_2_4)).extract_first()
-                print(section_5.css('div.txtmark::text').extract_first())
-                print('name {} value {}'.format(name, value))
-                if value:
-                    value = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', value)
+        if total:
+            total = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', total)
 
-                if name:
-                    names.append(name)
+        short_description = ''
+        for p in response.xpath(desc_xpath).xpath('string(.)').extract():
+            short_description += p.strip()
 
-                if value:
-                    values.append(value)
+        if sections_5:
+            for section_5 in sections_5:
+                if section_5:
 
-        item['name'] = ';'.join(names)
-        item['value'] = ';'.join(values)
+                    name = section_5.xpath(".//span[text()='{}']/following-sibling::div/text()".format(text_2_3)).extract_first()
+                    value = section_5.xpath(".//span[contains(text(),'{}')]/following-sibling::div/text()".format(text_2_4)).extract_first()
+
+                    if not currency and value:
+                        currency = value.split(' ')[-1]
+
+                    if value:
+                        value = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', value)
+
+                item['name'] = name
+                item['value'] = value
+                item['currency'] = currency
+                item['total'] = total
+                item['short_description'] = short_description.replace('\n', '') if short_description else ''
+                item['contracting_country'] = item['country']
+                yield item
+                # request = scrapy.Request(response.url + '&tabId=3', callback=self.parse_data, dont_filter=True)
+                # request.meta['item'] = item
+                # yield request
+        else:
+            yield item
+
+    def parse_data(self, response):
+        item = response.meta['item']
+        table = response.css('table.data')
+        item['award_date'] = table.xpath(".//td[text()='Document sent']/following-sibling::td/text()").extract_first()
+        item['contracting_authority'] = table.xpath(".//td[text()='Authority name']/following-sibling::td/text()").extract_first()
+        product_type = table.xpath(".//td[text()='Contract']/following-sibling::td/text()").extract_first()
+
+        if product_type:
+            product_type = re.sub(r'\n|\s', '', product_type)
+
+        item['product_type'] = product_type
+        item['contracting_authority_city'] = table.xpath(".//td[text()='Place']/following-sibling::td/text()").extract_first()
+
         return item
-
