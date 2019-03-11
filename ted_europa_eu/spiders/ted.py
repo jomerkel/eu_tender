@@ -17,6 +17,18 @@ class TedSpider(scrapy.Spider):
             dont_filter=True)
 
     def start_requests2(self, response):
+        cpvCodeList = '72000000,35000000,32000000,63000000,73000000,48000000'
+        documentTypeList = "'Results of design contests','Contract notice','Contract award notice','Voluntary ex ante transparency notice','Concession award notice'"
+        freeText = 'Nokia'
+        if hasattr(self, 'cpvCodeList'):
+            cpvCodeList = self.cpvCodeList
+
+        if hasattr(self, 'documentTypeList'):
+            dtlist = ["'{}'".format(dt.strip()) for dt in self.documentTypeList.split(',')]
+            documentTypeList = ','.join(dtlist)
+
+        if hasattr(self, 'freeText'):
+            freeText = self.freeText
 
         data = [
             ('action', 'search'),
@@ -24,13 +36,13 @@ class TedSpider(scrapy.Spider):
             ('Rs.gp.8686990.pid', 'secured'),
             ('Rs.gp.8686991.pid', 'secured'),
             ('searchCriteria.searchScope', 'ARCHIVE'),
-            ('searchCriteria.freeText', 'Nokia'),
+            ('searchCriteria.freeText', freeText),
             ('Rs.pick.857511.refDataId', 'COUNTRY'),
-            ('searchCriteria.documentTypeList', "'Results of design contests','Contract notice','Contract award notice','Voluntary ex ante transparency notice','Concession award notice'"),
+            ('searchCriteria.documentTypeList', documentTypeList),
             ('Rs.pick.857512.refDataId', 'DOCUMENT_TYPE'),
             ('Rs.pick.857513.refDataId', 'CONTRACT'),
             ('searchCriteria.publicationDateChoice', 'DEFINITE_PUBLICATION_DATE'),
-            ('searchCriteria.cpvCodeList', '72000000,35000000,32000000,63000000,73000000,48000000'),
+            ('searchCriteria.cpvCodeList', cpvCodeList),
             ('Rs.pick.857514.refDataId', 'CPV_CODE'),
             ('Rs.pick.857515.refDataId', 'NUTS_CODE'),
             ('Rs.pick.857516.refDataId', 'MAIN_ACTIVITY'),
@@ -76,6 +88,7 @@ class TedSpider(scrapy.Spider):
         text_2_4 = 'Information on value of the contract/lot (excluding VAT)'
         text_1_7 = 'Total value of the procuremen'
         text_1_4 = 'Short description'
+        # text_2 = 'Information about offers'
         desc_xpath = "//span[contains(text(), '{}')]//following-sibling::div".format(text_1_4)
 
         sections = response.css('div.grseq')
@@ -105,7 +118,10 @@ class TedSpider(scrapy.Spider):
 
                     name = section_5.xpath(".//span[text()='{}']/following-sibling::div/text()".format(text_2_3)).extract_first()
                     value = section_5.xpath(".//span[contains(text(),'{}')]/following-sibling::div/text()".format(text_2_4)).extract_first()
-
+                    # offers = section_5.xpath(".//span[contains(text(),'{}')]/following-sibling::div/span/text()".format(text_2)).extract_first()
+                    # print("----------------OFFER--------------------")
+                    # print(offers)
+                    # print('-----------------------------')
                     if not currency and value:
                         currency = value.split(' ')[-1]
 
@@ -118,7 +134,7 @@ class TedSpider(scrapy.Spider):
                 new_item['total'] = total
                 new_item['short_description'] = short_description.replace('\n', '') if short_description else ''
                 new_item['contracting_country'] = item['country']
-                # yield item
+
                 request = scrapy.Request(response.url + '&tabId=3', callback=self.parse_data, dont_filter=True)
                 request.meta['item'] = new_item
                 yield request
