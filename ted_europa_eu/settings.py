@@ -47,9 +47,9 @@ COOKIES_ENABLED = True
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'ted_europa_eu.middlewares.TetEuropaEuSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   'ted_europa_eu.middlewares.SimpleProxymeshMiddleware': 543,
+}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
@@ -90,3 +90,6 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 # LOG_FILE = 'log.log'
+PROXY_LOGIN = 'johannes.merkel'
+PROXY_PASS = 'C8^!gpYYExjiB+*C6Q%6'
+PROXYMESH_URL = 'http://{}:{}@de.proxymesh.com:31280'.format(PROXY_LOGIN, PROXY_PASS)
