@@ -93,3 +93,5 @@ ITEM_PIPELINES = {
 PROXY_LOGIN = 'johannes.merkel'
 PROXY_PASS = 'C8^!gpYYExjiB+*C6Q%6'
 PROXYMESH_URL = 'http://{}:{}@de.proxymesh.com:31280'.format(PROXY_LOGIN, PROXY_PASS)
+
+SEARCH_QUERY = 'FT=["Sign" OR "Verkehrsschild"] AND PC=[3499* OR 3492* OR 3152* OR 4523* OR 4481]'

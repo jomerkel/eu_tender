@@ -24,7 +24,7 @@ class NewTedSpider(scrapy.Spider):
     def search(self, response):
         data = {
             '$parameterType': 'cclQuery',
-            'value': 'FT=[\'Sign\' OR \'Verkehrsschild\'] AND PC=[3499* OR 3492* OR 3152* OR 4523* OR 4481]'
+            'value': self.settings['SEARCH_QUERY']
         }
 
         yield scrapy.FormRequest(
@@ -39,7 +39,7 @@ class NewTedSpider(scrapy.Spider):
                 'lgId': 'en',
                 'quickSearchCriteria': '',
                 'expertSearchCriteria.searchScope': 'ARCHIVE',
-                'expertSearchCriteria.query': 'FT=[\'Sign\' OR \'Verkehrsschild\'] AND PC=[3499* OR 3492* OR 3152* OR 4523* OR 4481]',
+                'expertSearchCriteria.query': self.settings['SEARCH_QUERY'],
                 '_expertSearchCriteria.statisticsMode': 'on'
             }
         yield scrapy.FormRequest(
