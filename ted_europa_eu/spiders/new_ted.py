@@ -114,6 +114,9 @@ class NewTedSpider(scrapy.Spider):
 
                     name = section_5.xpath(".//span[text()='{}']/following-sibling::div/text()".format(text_2_3)).extract_first()
                     value = section_5.xpath(".//span[contains(text(),'{}')]/following-sibling::div/text()".format(text_2_4)).extract_first()
+                    lot_no = section_5.xpath(".//b[contains(text(),'Lot No')]/parent::div/text()").extract()
+                    lot_no = ' '.join(lot_no) if lot_no else lot_no
+                    lot_no = re.sub(r'\D', '', lot_no) if lot_no else lot_no
 
                     if not currency and value:
                         currency = value.split(' ')[-1]
@@ -122,6 +125,7 @@ class NewTedSpider(scrapy.Spider):
                         value = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', value)
 
                 new_item['name'] = name.split(':')[-1] if name and ':' in name else name
+                new_item['lot_no'] = lot_no
                 new_item['value'] = value
                 new_item['currency'] = currency
                 new_item['total'] = total

@@ -19,3 +19,4 @@ class TedEuropaEuItem(scrapy.Item):
     product_type = scrapy.Field()
     contracting_authority_city = scrapy.Field()
     cpv_code = scrapy.Field()
+    lot_no = scrapy.Field()
