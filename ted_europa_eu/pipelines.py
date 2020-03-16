@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from scrapy import signals
 from scrapy.exporters import CsvItemExporter
 
@@ -14,9 +16,10 @@ class TedEuropaEuPipeline(object):
     def spider_opened(self, spider):
         self.duplicates = []
 
-        self.file = open('search_result_{}.csv'.format(spider.name), 'wb')
-        self.file_details = open('details_result_{}.csv'.format(spider.name), 'wb')
-        self.file_cpv_codes = open('details_cpv_{}.csv'.format(spider.name), 'wb')
+        time = datetime.now().strftime('%Y%m%d')
+        self.file = open('{}_TED_Search_Result.csv'.format(time), 'wb')
+        self.file_details = open('{}_TED_Details_Result.csv'.format(time), 'wb')
+        self.file_cpv_codes = open('{}_TED_Details_CPV.csv'.format(time), 'wb')
 
         self.exporter = CsvItemExporter(self.file)
         self.details_exporter = CsvItemExporter(self.file_details)
