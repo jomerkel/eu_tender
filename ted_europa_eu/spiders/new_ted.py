@@ -121,7 +121,7 @@ class NewTedSpider(scrapy.Spider):
                     if value:
                         value = re.sub(r'\s|[a-zA-Z]|[:/\;!?]', '', value)
 
-                new_item['name'] = name
+                new_item['name'] = name.split(':')[-1] if name and ':' in name else name
                 new_item['value'] = value
                 new_item['currency'] = currency
                 new_item['total'] = total
