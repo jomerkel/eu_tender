@@ -11,7 +11,7 @@ class NewTedSpider(scrapy.Spider):
     start_urls = ['http://ted.europa.eu/']
 
     custom_settings = {
-        'DOWNLOAD_DELAY': 1
+        'DOWNLOAD_DELAY': 3
     }
 
     def start_requests(self):
@@ -152,4 +152,33 @@ class NewTedSpider(scrapy.Spider):
         item['contracting_authority_city'] = table.xpath(".//td[text()='Place']/following-sibling::td/text()").extract_first()
 
         item['cpv_code'] = table.xpath(".//td[text()='CPV code']/following-sibling::td/text()").extract()
+        item['TI'] = self.get_data_from_table(table, 'TI')
+        item['ND'] = self.get_data_from_table(table, 'ND')
+        item['PD'] = self.get_data_from_table(table, 'PD')
+        item['OJ'] = self.get_data_from_table(table, 'OJ')
+        item['TW'] = self.get_data_from_table(table, 'TW')
+        item['AU'] = self.get_data_from_table(table, 'AU')
+        item['OL'] = self.get_data_from_table(table, 'OL')
+        item['HD'] = self.get_data_from_table(table, 'HD')
+        item['CY'] = self.get_data_from_table(table, 'CY')
+        item['AA'] = self.get_data_from_table(table, 'AA')
+        item['HA'] = self.get_data_from_table(table, 'HA')
+        item['DS'] = self.get_data_from_table(table, 'DS')
+        item['NC'] = self.get_data_from_table(table, 'NC')
+        item['PR'] = self.get_data_from_table(table, 'PR')
+        item['TD'] = self.get_data_from_table(table, 'TD')
+        item['RP'] = self.get_data_from_table(table, 'RP')
+        item['TY'] = self.get_data_from_table(table, 'TY')
+        item['AC'] = self.get_data_from_table(table, 'AC')
+        item['PC'] = self.get_data_from_table(table, 'PC')
+        item['RC'] = self.get_data_from_table(table, 'RC')
+        item['IA'] = self.get_data_from_table(table, 'IA')
+        item['DI'] = self.get_data_from_table(table, 'DI')
         yield item
+
+    def get_data_from_table(self, table, key):
+        value = table.xpath(".//tr//th[text()='{}']/following-sibling::td[2]/text()".format(key)).extract_first()
+        if value:
+            value = re.sub(r'\n|\r|\t', '', value)
+            return value.strip()
+        return value
