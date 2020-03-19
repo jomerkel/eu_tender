@@ -33,7 +33,9 @@ class TedEuropaEuPipeline(object):
         self.details_exporter.fields_to_export = [
             'url', 'document_id', 'name', 'value', 'lot_no', 'total', 'currency',
             'contracting_country', 'award_date', 'product_type', 'contracting_authority',
-            'contracting_authority_city']
+            'contracting_authority_city', 'NrTendersRecieved', 'NrTendersRecievedSME',
+            'NrTendersRecievedoEU', 'NrTendersRecievednonEU',
+            'NrTendersRecievedelectronic', 'Consortium']
 
         self.data_exporter.fields_to_export = [
             'url', 'document_id', 'TI', 'ND', 'PD', 'OJ', 'TW', 'AU', 'OL', 'HD', 'CY',

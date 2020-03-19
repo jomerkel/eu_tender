@@ -85,6 +85,14 @@ class NewTedSpider(scrapy.Spider):
         text_1_7 = 'Total value of the procuremen'
         text_1_4 = 'Short description'
 
+        text_2_2_1 = 'Number of tenders received:'
+        text_2_2_2 = 'Number of tenders received from SMEs'
+        text_2_2_3 = 'Number of tenders received from tenderers from other EU Member States'
+        text_2_2_4 = 'Number of tenders received from tenderers from non-EU Member States'
+        text_2_2_5 = 'Number of tenders received by electronic means'
+        text_2_2_6 = 'The contract has been awarded to a group of economic operators'
+        xpath_2_2 = ".//div[contains(text(), '{}')]/text()"
+
         desc_xpath = "//span[contains(text(), '{}')]//following-sibling::div".format(text_1_4)
 
         sections = response.css('div.grseq')
@@ -131,6 +139,20 @@ class NewTedSpider(scrapy.Spider):
                 new_item['total'] = total
                 new_item['short_description'] = short_description.replace('\n', '') if short_description else ''
                 new_item['contracting_country'] = item['country']
+
+                NrTendersRecieved = section_5.xpath(xpath_2_2.format(text_2_2_1)).extract_first()
+                NrTendersRecievedSME = section_5.xpath(xpath_2_2.format(text_2_2_2)).extract_first()
+                NrTendersRecievedoEU = section_5.xpath(xpath_2_2.format(text_2_2_3)).extract_first()
+                NrTendersRecievednonEU = section_5.xpath(xpath_2_2.format(text_2_2_4)).extract_first()
+                NrTendersRecievedelectronic = section_5.xpath(xpath_2_2.format(text_2_2_5)).extract_first()
+                Consortium = section_5.xpath(xpath_2_2.format(text_2_2_6)).extract_first()
+
+                new_item['NrTendersRecieved'] = NrTendersRecieved.split(':')[-1] if NrTendersRecieved else None
+                new_item['NrTendersRecievedSME'] = NrTendersRecievedSME.split(':')[-1] if NrTendersRecievedSME else None
+                new_item['NrTendersRecievedoEU'] = NrTendersRecievedoEU.split(':')[-1] if NrTendersRecievedoEU else None
+                new_item['NrTendersRecievednonEU'] = NrTendersRecievednonEU.split(':')[-1] if NrTendersRecievednonEU else None
+                new_item['NrTendersRecievedelectronic'] = NrTendersRecievedelectronic.split(':')[-1] if NrTendersRecievedelectronic else None
+                new_item['Consortium'] = Consortium.split(':')[-1] if Consortium else None
 
                 request = scrapy.Request(response.url + '&tabId=3', callback=self.parse_data, dont_filter=True)
                 request.meta['item'] = new_item
