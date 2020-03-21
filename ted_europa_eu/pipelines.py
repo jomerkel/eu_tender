@@ -18,6 +18,7 @@ class TedEuropaEuPipeline(object):
 
         time = datetime.now().strftime('%Y%m%d')
         self.document_ids = []
+
         self.file = open('{}_TED_Search_Result.csv'.format(time), 'wb')
         self.file_details = open('{}_TED_Details_Result.csv'.format(time), 'wb')
         self.file_cpv_codes = open('{}_TED_Details_CPV.csv'.format(time), 'wb')
